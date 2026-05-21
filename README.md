@@ -15,6 +15,7 @@ A single self-contained HTML file (`index.html`) — open it in any browser, no 
 - **Random shuffle** — weighted by exam blueprint, endless rotation
 - **By domain** — drill a single domain
 - **Timed exam** — simulates the real 65-question / 90-minute exam with pass/fail at scaled score 720
+- **CertSafari exam** — separate full exam mode using only CertSafari questions
 - **Quick 10** — fast spot-check
 
 ## Features

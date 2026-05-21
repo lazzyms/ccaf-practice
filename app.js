@@ -149,7 +149,7 @@ function renderHome() {
   $("optExplain").onchange = () => state.explain = $("optExplain").checked;
 
   // disable explain toggle in exam mode (no explanations until end)
-  if (state.mode === "exam") {
+  if (state.mode === "exam" || state.mode === "certsafari_exam") {
     $("optExplain").checked = false;
     $("optExplain").disabled = true;
   } else {
@@ -161,6 +161,7 @@ function renderHome() {
     random: "Start random session →",
     domain: "Start domain drill →",
     exam: "Begin 90-minute exam →",
+    certsafari_exam: "Begin CertSafari exam →",
     quickset: "Start quick 10 →",
   };
   $("startBtn").textContent = labels[state.mode];
@@ -181,6 +182,17 @@ function startQuiz() {
     state.questions = shuffle(dp);
   } else if (state.mode === "exam") {
     state.questions = weightedPickPool(pool, 65);
+    state.examMode = true;
+    state.examEndTime = Date.now() + 90 * 60 * 1000;
+    state.explain = false;
+  } else if (state.mode === "certsafari_exam") {
+    const certSafariPool = window.CERTSAFARI_QUESTION_BANK || [];
+    if (certSafariPool.length === 0) {
+      alert("CertSafari question set is unavailable.");
+      renderHome();
+      return;
+    }
+    state.questions = shuffle(certSafariPool);
     state.examMode = true;
     state.examEndTime = Date.now() + 90 * 60 * 1000;
     state.explain = false;
@@ -398,4 +410,3 @@ window.addEventListener("DOMContentLoaded", () => {
   }
   renderHome();
 });
-
