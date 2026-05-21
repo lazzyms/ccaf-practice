@@ -1,0 +1,459 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); color: var(--color-text-primary); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+.shell { display: flex; gap: 0; min-height: 520px; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); overflow: hidden; background: var(--color-background-primary); }
+.sidebar { width: 200px; flex-shrink: 0; border-right: 0.5px solid var(--color-border-tertiary); background: var(--color-background-secondary); padding: 12px 0; }
+.sidebar-title { font-size: 11px; font-weight: 500; color: var(--color-text-tertiary); padding: 0 14px 8px; letter-spacing: 0.05em; text-transform: uppercase; }
+.nav-item { display: flex; align-items: center; gap: 8px; padding: 7px 14px; font-size: 13px; cursor: pointer; color: var(--color-text-secondary); border-left: 2px solid transparent; transition: all 0.15s; }
+.nav-item:hover { background: var(--color-background-primary); color: var(--color-text-primary); }
+.nav-item.active { background: var(--color-background-primary); color: var(--color-text-primary); border-left-color: #7F77DD; font-weight: 500; }
+.nav-item i { font-size: 16px; }
+.main { flex: 1; overflow-y: auto; padding: 24px 28px; }
+.section { display: none; }
+.section.visible { display: block; }
+.section-title { font-size: 18px; font-weight: 500; margin-bottom: 6px; }
+.section-subtitle { font-size: 14px; color: var(--color-text-secondary); margin-bottom: 20px; line-height: 1.5; }
+.tip-box { background: #EEEDFE; border: 0.5px solid #AFA9EC; border-radius: var(--border-radius-md); padding: 12px 16px; margin-bottom: 20px; display: flex; gap: 10px; align-items: flex-start; }
+.tip-box i { color: #534AB7; font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.tip-box p { font-size: 13px; color: #3C3489; line-height: 1.5; }
+.cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 20px; }
+.card { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 14px; cursor: pointer; transition: border-color 0.15s; }
+.card:hover { border-color: var(--color-border-secondary); }
+.card-icon { font-size: 22px; margin-bottom: 8px; color: #7F77DD; }
+.card-title { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+.card-desc { font-size: 12px; color: var(--color-text-secondary); line-height: 1.4; }
+.compare-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 20px; }
+.compare-table th { text-align: left; padding: 8px 10px; background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); font-weight: 500; color: var(--color-text-secondary); font-size: 12px; }
+.compare-table td { padding: 8px 10px; border: 0.5px solid var(--color-border-tertiary); vertical-align: top; line-height: 1.4; }
+.compare-table td.bad { color: #993C1D; background: #FAECE7; }
+.compare-table td.good { color: #0F6E56; background: #E1F5EE; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 500; }
+.badge-purple { background: #EEEDFE; color: #534AB7; }
+.badge-teal { background: #E1F5EE; color: #0F6E56; }
+.badge-coral { background: #FAECE7; color: #993C1D; }
+.step-list { list-style: none; counter-reset: steps; margin-bottom: 20px; }
+.step-item { counter-increment: steps; display: flex; gap: 14px; margin-bottom: 16px; }
+.step-num { width: 26px; height: 26px; border-radius: 50%; background: #7F77DD; color: #fff; font-size: 12px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+.step-body { flex: 1; }
+.step-title { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+.step-desc { font-size: 13px; color: var(--color-text-secondary); line-height: 1.5; }
+.code-block { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 12px 14px; font-family: var(--font-mono); font-size: 12px; line-height: 1.6; color: var(--color-text-secondary); margin: 8px 0; white-space: pre-wrap; word-break: break-word; }
+.quiz-q { font-size: 14px; font-weight: 500; margin-bottom: 12px; line-height: 1.5; }
+.quiz-options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.quiz-opt { padding: 10px 14px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); font-size: 13px; cursor: pointer; transition: all 0.15s; background: var(--color-background-primary); color: var(--color-text-primary); text-align: left; }
+.quiz-opt:hover { border-color: #7F77DD; background: #EEEDFE; color: #3C3489; }
+.quiz-opt.correct { border-color: #1D9E75; background: #E1F5EE; color: #085041; }
+.quiz-opt.wrong { border-color: #D85A30; background: #FAECE7; color: #4A1B0C; }
+.quiz-feedback { font-size: 13px; line-height: 1.5; padding: 10px 14px; border-radius: var(--border-radius-md); margin-bottom: 12px; display: none; }
+.quiz-feedback.show { display: block; }
+.quiz-feedback.ok { background: #E1F5EE; color: #085041; }
+.quiz-feedback.no { background: #FAECE7; color: #4A1B0C; }
+.quiz-nav { display: flex; align-items: center; gap: 10px; }
+.quiz-nav button { padding: 7px 16px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); font-size: 13px; cursor: pointer; background: var(--color-background-primary); color: var(--color-text-primary); }
+.quiz-nav button:hover { background: var(--color-background-secondary); }
+.quiz-prog { font-size: 12px; color: var(--color-text-tertiary); }
+.pattern-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 20px; }
+.pattern-card { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); overflow: hidden; }
+.pattern-header { padding: 10px 14px; background: var(--color-background-secondary); font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.pattern-body { padding: 12px 14px; display: none; }
+.pattern-body.open { display: block; }
+.chev { margin-left: auto; font-size: 16px; transition: transform 0.2s; }
+.chev.open { transform: rotate(180deg); }
+.context-meter { margin: 20px 0; }
+.meter-label { font-size: 13px; font-weight: 500; margin-bottom: 8px; }
+.meter-bar { height: 20px; background: var(--color-background-secondary); border-radius: 99px; overflow: hidden; border: 0.5px solid var(--color-border-tertiary); }
+.meter-fill { height: 100%; background: linear-gradient(90deg, #5DCAA5 0%, #EF9F27 60%, #E24B4A 90%); border-radius: 99px; transition: width 0.4s; }
+.meter-row { display: flex; justify-content: space-between; font-size: 11px; color: var(--color-text-tertiary); margin-top: 4px; }
+.slider-row { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+.slider-row label { font-size: 13px; color: var(--color-text-secondary); width: 120px; flex-shrink: 0; }
+.slider-row input[type=range] { flex: 1; }
+.slider-row span { font-size: 13px; font-weight: 500; width: 28px; text-align: right; }
+.ctx-tip { margin-top: 14px; padding: 10px 14px; border-radius: var(--border-radius-md); font-size: 13px; line-height: 1.5; }
+</style>
+<h2 class="sr-only">Interactive learning guide for Claude Code best practices, covering context management, prompting, sessions, and automation.</h2>
+
+<div class="shell">
+  <nav class="sidebar">
+    <p class="sidebar-title">Learn</p>
+    <div class="nav-item active" data-sec="overview"><i class="ti ti-home" aria-hidden="true"></i> Overview</div>
+    <div class="nav-item" data-sec="context"><i class="ti ti-chart-bar" aria-hidden="true"></i> Context window</div>
+    <div class="nav-item" data-sec="prompting"><i class="ti ti-message" aria-hidden="true"></i> Prompting</div>
+    <div class="nav-item" data-sec="workflow"><i class="ti ti-sitemap" aria-hidden="true"></i> Workflow</div>
+    <div class="nav-item" data-sec="setup"><i class="ti ti-settings" aria-hidden="true"></i> Setup</div>
+    <div class="nav-item" data-sec="session"><i class="ti ti-clock" aria-hidden="true"></i> Session mgmt</div>
+    <div class="nav-item" data-sec="scale"><i class="ti ti-topology-star" aria-hidden="true"></i> Scale</div>
+    <div class="nav-item" data-sec="antipatterns"><i class="ti ti-bug" aria-hidden="true"></i> Anti-patterns</div>
+    <div class="nav-item" data-sec="quiz"><i class="ti ti-school" aria-hidden="true"></i> Quiz</div>
+  </nav>
+
+  <div class="main">
+
+    <div class="section visible" id="sec-overview">
+      <p class="section-title">Best practices for Claude Code</p>
+      <p class="section-subtitle">Claude Code is an agentic coding environment — it reads files, runs commands, and autonomously works through problems. Use this guide to build intuition fast.</p>
+      <div class="tip-box"><i class="ti ti-bulb" aria-hidden="true"></i><p>One constraint shapes everything: <strong>Claude's context window fills up fast, and performance degrades as it fills.</strong> Managing context is the highest-leverage skill you can develop.</p></div>
+      <div class="cards-grid">
+        <div class="card" onclick="goTo('context')"><div class="card-icon"><i class="ti ti-chart-bar" aria-hidden="true"></i></div><div class="card-title">Context window</div><div class="card-desc">Why it matters and how to track it</div></div>
+        <div class="card" onclick="goTo('prompting')"><div class="card-icon"><i class="ti ti-message" aria-hidden="true"></i></div><div class="card-title">Prompting</div><div class="card-desc">Specific, verifiable, rich prompts</div></div>
+        <div class="card" onclick="goTo('workflow')"><div class="card-icon"><i class="ti ti-sitemap" aria-hidden="true"></i></div><div class="card-title">Explore → Plan → Code</div><div class="card-desc">The 4-phase workflow</div></div>
+        <div class="card" onclick="goTo('setup')"><div class="card-icon"><i class="ti ti-settings" aria-hidden="true"></i></div><div class="card-title">Setup</div><div class="card-desc">CLAUDE.md, hooks, skills, MCP</div></div>
+        <div class="card" onclick="goTo('session')"><div class="card-icon"><i class="ti ti-clock" aria-hidden="true"></i></div><div class="card-title">Session mgmt</div><div class="card-desc">Rewinding, clearing, resuming</div></div>
+        <div class="card" onclick="goTo('scale')"><div class="card-icon"><i class="ti ti-topology-star" aria-hidden="true"></i></div><div class="card-title">Scale</div><div class="card-desc">Parallel sessions and fan-out</div></div>
+        <div class="card" onclick="goTo('antipatterns')"><div class="card-icon"><i class="ti ti-bug" aria-hidden="true"></i></div><div class="card-title">Anti-patterns</div><div class="card-desc">Common failure modes to avoid</div></div>
+        <div class="card" onclick="goTo('quiz')"><div class="card-icon"><i class="ti ti-school" aria-hidden="true"></i></div><div class="card-title">Quiz yourself</div><div class="card-desc">Test your understanding</div></div>
+      </div>
+    </div>
+
+    <div class="section" id="sec-context">
+      <p class="section-title">Context window</p>
+      <p class="section-subtitle">The context window holds every message, file read, and command output in a session. As it fills, performance drops — Claude may miss earlier instructions or make more errors.</p>
+      <div class="tip-box"><i class="ti ti-bulb" aria-hidden="true"></i><p>Context is your most important resource. Treat it like RAM — don't let it fill with irrelevant history.</p></div>
+
+      <p style="font-size:14px; font-weight:500; margin-bottom:12px;">Simulate context fill</p>
+      <div class="context-meter">
+        <div class="meter-bar"><div class="meter-fill" id="ctx-bar" style="width:5%"></div></div>
+        <div class="meter-row"><span>0%</span><span>50%</span><span>100%</span></div>
+      </div>
+      <div class="slider-row"><label>File reads</label><input type="range" min="0" max="10" value="0" id="sl-files" oninput="updateCtx()"><span id="sl-files-v">0</span></div>
+      <div class="slider-row"><label>Commands run</label><input type="range" min="0" max="10" value="0" id="sl-cmds" oninput="updateCtx()"><span id="sl-cmds-v">0</span></div>
+      <div class="slider-row"><label>Correction loops</label><input type="range" min="0" max="5" value="0" id="sl-corr" oninput="updateCtx()"><span id="sl-corr-v">0</span></div>
+      <div class="ctx-tip" id="ctx-tip"></div>
+
+      <p style="font-size:13px; font-weight:500; margin:20px 0 8px;">Ways to reclaim context</p>
+      <div class="compare-table" style="width:100%;border-collapse:collapse;font-size:13px;">
+        <table style="width:100%;border-collapse:collapse;">
+          <thead><tr><th style="padding:8px 10px;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);font-weight:500;color:var(--color-text-secondary);font-size:12px;">Command</th><th style="padding:8px 10px;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);font-weight:500;color:var(--color-text-secondary);font-size:12px;">What it does</th></tr></thead>
+          <tbody>
+            <tr><td style="padding:8px 10px;border:0.5px solid var(--color-border-tertiary);font-family:var(--font-mono);font-size:12px;">/clear</td><td style="padding:8px 10px;border:0.5px solid var(--color-border-tertiary);">Resets the full context window between unrelated tasks</td></tr>
+            <tr><td style="padding:8px 10px;border:0.5px solid var(--color-border-tertiary);font-family:var(--font-mono);font-size:12px;">/compact</td><td style="padding:8px 10px;border:0.5px solid var(--color-border-tertiary);">Compresses conversation to a summary, keeping decisions</td></tr>
+            <tr><td style="padding:8px 10px;border:0.5px solid var(--color-border-tertiary);font-family:var(--font-mono);font-size:12px;">/btw</td><td style="padding:8px 10px;border:0.5px solid var(--color-border-tertiary);">Quick side question — answer shown in overlay, never stored</td></tr>
+            <tr><td style="padding:8px 10px;border:0.5px solid var(--color-border-tertiary);">Subagents</td><td style="padding:8px 10px;border:0.5px solid var(--color-border-tertiary);">Delegate research to a separate context; only summary returns</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section" id="sec-prompting">
+      <p class="section-title">Prompting</p>
+      <p class="section-subtitle">Claude can infer intent, but the more precise your instructions, the fewer corrections you'll need. Compare vague vs. specific prompts below.</p>
+      <div class="tip-box"><i class="ti ti-bulb" aria-hidden="true"></i><p>Always give Claude a way to verify its work — tests, screenshots, expected outputs. This is the single highest-leverage habit.</p></div>
+
+      <table class="compare-table" style="width:100%;">
+        <thead><tr><th>Scenario</th><th>Vague ❌</th><th>Specific ✅</th></tr></thead>
+        <tbody>
+          <tr>
+            <td style="padding:8px 10px;border:0.5px solid var(--color-border-tertiary);font-weight:500;font-size:12px;">Testing</td>
+            <td class="bad" style="padding:8px 10px;border:0.5px solid var(--color-border-tertiary);">Add tests for foo.py</td>
+            <td class="good" style="padding:8px 10px;border:0.5px solid var(--color-border-tertiary);">Write a test for foo.py covering the edge case where the user is logged out. Avoid mocks.</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 10px;border:0.5px solid var(--color-border-tertiary);font-weight:500;font-size:12px;">Bug fix</td>
+            <td class="bad" style="padding:8px 10px;border:0.5px solid var(--color-border-tertiary);">The build is failing</td>
+            <td class="good" style="padding:8px 10px;border:0.5px solid var(--color-border-tertiary);">The build fails with [error]. Fix it and verify the build succeeds. Address root cause, don't suppress the error.</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 10px;border:0.5px solid var(--color-border-tertiary);font-weight:500;font-size:12px;">UI work</td>
+            <td class="bad" style="padding:8px 10px;border:0.5px solid var(--color-border-tertiary);">Make the dashboard look better</td>
+            <td class="good" style="padding:8px 10px;border:0.5px solid var(--color-border-tertiary);">[paste screenshot] Implement this design. Take a screenshot of the result and compare. List differences and fix them.</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 10px;border:0.5px solid var(--color-border-tertiary);font-weight:500;font-size:12px;">New feature</td>
+            <td class="bad" style="padding:8px 10px;border:0.5px solid var(--color-border-tertiary);">Add a calendar widget</td>
+            <td class="good" style="padding:8px 10px;border:0.5px solid var(--color-border-tertiary);">Look at HotDogWidget.php as an example pattern. Implement a new calendar widget that lets the user select a month and paginate forwards/backwards.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p style="font-size:13px; font-weight:500; margin:16px 0 8px;">Rich context techniques</p>
+      <div class="cards-grid">
+        <div class="card"><div class="card-icon"><i class="ti ti-at" aria-hidden="true"></i></div><div class="card-title">@file references</div><div class="card-desc">Reference files with @ — Claude reads them before responding</div></div>
+        <div class="card"><div class="card-icon"><i class="ti ti-photo" aria-hidden="true"></i></div><div class="card-title">Paste images</div><div class="card-desc">Drag/drop screenshots directly into the prompt</div></div>
+        <div class="card"><div class="card-icon"><i class="ti ti-terminal" aria-hidden="true"></i></div><div class="card-title">Pipe data</div><div class="card-desc">Run <code>cat error.log | claude</code> to send file contents directly</div></div>
+        <div class="card"><div class="card-icon"><i class="ti ti-link" aria-hidden="true"></i></div><div class="card-title">Give URLs</div><div class="card-desc">Paste docs/API refs. Allowlist frequent domains in /permissions</div></div>
+      </div>
+    </div>
+
+    <div class="section" id="sec-workflow">
+      <p class="section-title">Explore → Plan → Code → Commit</p>
+      <p class="section-subtitle">Separating research from implementation avoids solving the wrong problem. Use plan mode to keep exploration separate from execution.</p>
+      <div class="tip-box"><i class="ti ti-bulb" aria-hidden="true"></i><p>For small, clear tasks — a typo fix, a log line — skip the plan. Planning is most useful when the change spans multiple files or you're unfamiliar with the code.</p></div>
+      <ol class="step-list">
+        <li class="step-item"><div class="step-num">1</div><div class="step-body"><div class="step-title">Explore <span class="badge badge-purple">plan mode</span></div><div class="step-desc">Enter plan mode. Claude reads files and answers questions without making changes.</div><div class="code-block">read /src/auth and understand how we handle sessions and login.</div></div></li>
+        <li class="step-item"><div class="step-num">2</div><div class="step-body"><div class="step-title">Plan <span class="badge badge-purple">plan mode</span></div><div class="step-desc">Ask Claude to create a detailed implementation plan. Press Ctrl+G to open the plan in your editor.</div><div class="code-block">I want to add Google OAuth. What files need to change? What's the session flow? Create a plan.</div></div></li>
+        <li class="step-item"><div class="step-num">3</div><div class="step-body"><div class="step-title">Implement <span class="badge badge-teal">default mode</span></div><div class="step-desc">Switch out of plan mode and let Claude code, verifying against its plan.</div><div class="code-block">implement the OAuth flow from your plan. write tests for the callback handler, run the test suite and fix any failures.</div></div></li>
+        <li class="step-item"><div class="step-num">4</div><div class="step-body"><div class="step-title">Commit <span class="badge badge-teal">default mode</span></div><div class="step-desc">Ask Claude to commit with a descriptive message and create a PR.</div><div class="code-block">commit with a descriptive message and open a PR</div></div></li>
+      </ol>
+
+      <div class="tip-box" style="background:#E1F5EE;border-color:#5DCAA5;"><i class="ti ti-users" aria-hidden="true" style="color:#0F6E56;"></i><p style="color:#04342C;">Let Claude interview you for complex features. Start with a minimal prompt and ask Claude to use the AskUserQuestion tool — it surfaces edge cases and tradeoffs you might miss.</p></div>
+    </div>
+
+    <div class="section" id="sec-setup">
+      <p class="section-title">Configure your environment</p>
+      <p class="section-subtitle">A few setup steps make Claude Code significantly more effective across all sessions.</p>
+
+      <div class="pattern-grid">
+        <div class="pattern-card">
+          <div class="pattern-header" onclick="togglePattern(this)"><i class="ti ti-file-text" aria-hidden="true" style="color:#7F77DD;font-size:16px;"></i> CLAUDE.md <i class="ti ti-chevron-down chev" aria-hidden="true"></i></div>
+          <div class="pattern-body">
+            <p style="font-size:13px;color:var(--color-text-secondary);line-height:1.5;margin-bottom:10px;">Read at the start of every session. Include Bash commands, code style, and workflow rules. Run <code>/init</code> to generate a starter file.</p>
+            <p style="font-size:12px;font-weight:500;margin-bottom:6px;">✅ Include</p>
+            <p style="font-size:12px;color:var(--color-text-secondary);margin-bottom:8px;">Bash commands, code style rules that differ from defaults, testing instructions, branch naming conventions, architectural decisions, environment quirks</p>
+            <p style="font-size:12px;font-weight:500;margin-bottom:6px;">❌ Exclude</p>
+            <p style="font-size:12px;color:var(--color-text-secondary);">Things Claude can infer from code, standard conventions, detailed API docs, file-by-file descriptions, self-evident practices like "write clean code"</p>
+          </div>
+        </div>
+        <div class="pattern-card">
+          <div class="pattern-header" onclick="togglePattern(this)"><i class="ti ti-lock" aria-hidden="true" style="color:#7F77DD;font-size:16px;"></i> Permissions <i class="ti ti-chevron-down chev" aria-hidden="true"></i></div>
+          <div class="pattern-body">
+            <p style="font-size:13px;color:var(--color-text-secondary);line-height:1.5;margin-bottom:10px;">Three ways to reduce approval interruptions:</p>
+            <ul style="font-size:13px;color:var(--color-text-secondary);padding-left:16px;line-height:1.8;">
+              <li><strong>Auto mode</strong> — a classifier handles approvals, blocking only risky actions</li>
+              <li><strong>Allowlists</strong> — permit specific safe commands like <code>npm run lint</code></li>
+              <li><strong>Sandboxing</strong> — OS-level isolation so Claude can work freely within limits</li>
+            </ul>
+          </div>
+        </div>
+        <div class="pattern-card">
+          <div class="pattern-header" onclick="togglePattern(this)"><i class="ti ti-webhook" aria-hidden="true" style="color:#7F77DD;font-size:16px;"></i> Hooks <i class="ti ti-chevron-down chev" aria-hidden="true"></i></div>
+          <div class="pattern-body">
+            <p style="font-size:13px;color:var(--color-text-secondary);line-height:1.5;margin-bottom:10px;">Hooks run scripts at specific points in Claude's workflow. Unlike CLAUDE.md instructions (advisory), hooks are <strong>deterministic</strong> — they always run.</p>
+            <div class="code-block">Write a hook that runs eslint after every file edit</div>
+            <div class="code-block">Write a hook that blocks writes to the migrations folder</div>
+            <p style="font-size:12px;color:var(--color-text-tertiary);margin-top:6px;">Run <code>/hooks</code> to browse what's configured</p>
+          </div>
+        </div>
+        <div class="pattern-card">
+          <div class="pattern-header" onclick="togglePattern(this)"><i class="ti ti-puzzle" aria-hidden="true" style="color:#7F77DD;font-size:16px;"></i> Skills & subagents <i class="ti ti-chevron-down chev" aria-hidden="true"></i></div>
+          <div class="pattern-body">
+            <p style="font-size:13px;color:var(--color-text-secondary);line-height:1.5;margin-bottom:10px;"><strong>Skills</strong> live in <code>.claude/skills/</code> and give Claude domain knowledge or reusable workflows. Invoked automatically or with <code>/skill-name</code>.</p>
+            <p style="font-size:13px;color:var(--color-text-secondary);line-height:1.5;margin-bottom:10px;"><strong>Subagents</strong> live in <code>.claude/agents/</code> and run in their own context with their own allowed tools — perfect for isolated research tasks.</p>
+            <div class="code-block">Use a subagent to review this code for security issues</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" id="sec-session">
+      <p class="section-title">Session management</p>
+      <p class="section-subtitle">Conversations are persistent and reversible. Every prompt creates a checkpoint — you can restore conversation, code, or both at any time.</p>
+
+      <div class="cards-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));">
+        <div class="card"><div class="card-icon"><i class="ti ti-player-stop" aria-hidden="true"></i></div><div class="card-title">Esc</div><div class="card-desc">Stop Claude mid-action. Context is preserved, so you can redirect.</div></div>
+        <div class="card"><div class="card-icon"><i class="ti ti-arrow-back-up" aria-hidden="true"></i></div><div class="card-title">Esc + Esc / /rewind</div><div class="card-desc">Open the rewind menu — restore conversation, code, or both to any checkpoint.</div></div>
+        <div class="card"><div class="card-icon"><i class="ti ti-eraser" aria-hidden="true"></i></div><div class="card-title">/clear</div><div class="card-desc">Reset context entirely between unrelated tasks.</div></div>
+        <div class="card"><div class="card-icon"><i class="ti ti-pencil" aria-hidden="true"></i></div><div class="card-title">/compact</div><div class="card-desc">Compress history to a summary. Use <code>/compact Focus on API changes</code> to guide it.</div></div>
+        <div class="card"><div class="card-icon"><i class="ti ti-message-circle" aria-hidden="true"></i></div><div class="card-title">/btw</div><div class="card-desc">Side question — answer appears in an overlay and never enters history.</div></div>
+        <div class="card"><div class="card-icon"><i class="ti ti-refresh" aria-hidden="true"></i></div><div class="card-title">--resume</div><div class="card-desc">Run <code>claude --resume</code> to pick a saved session. Use /rename to name sessions.</div></div>
+      </div>
+
+      <div class="tip-box" style="margin-top:16px;"><i class="ti ti-bulb" aria-hidden="true"></i><p>After two failed corrections on the same issue, run <code>/clear</code> and start fresh with a more specific prompt incorporating what you learned. A clean session with a better prompt almost always beats a long session with accumulated corrections.</p></div>
+    </div>
+
+    <div class="section" id="sec-scale">
+      <p class="section-title">Automate and scale</p>
+      <p class="section-subtitle">Claude Code scales horizontally. Once you're effective with one session, multiply output with parallel sessions, non-interactive mode, and fan-out patterns.</p>
+
+      <div class="pattern-grid">
+        <div class="pattern-card">
+          <div class="pattern-header" onclick="togglePattern(this)"><i class="ti ti-terminal" aria-hidden="true" style="color:#7F77DD;font-size:16px;"></i> Non-interactive mode <i class="ti ti-chevron-down chev" aria-hidden="true"></i></div>
+          <div class="pattern-body">
+            <p style="font-size:13px;color:var(--color-text-secondary);line-height:1.5;margin-bottom:8px;">Use <code>claude -p "prompt"</code> in CI, pre-commit hooks, or scripts.</p>
+            <div class="code-block">claude -p "Explain what this project does"
+claude -p "List all API endpoints" --output-format json
+claude -p "Analyze this log file" --output-format stream-json</div>
+          </div>
+        </div>
+        <div class="pattern-card">
+          <div class="pattern-header" onclick="togglePattern(this)"><i class="ti ti-layout-columns" aria-hidden="true" style="color:#7F77DD;font-size:16px;"></i> Parallel sessions <i class="ti ti-chevron-down chev" aria-hidden="true"></i></div>
+          <div class="pattern-body">
+            <p style="font-size:13px;color:var(--color-text-secondary);line-height:1.5;margin-bottom:8px;"><strong>Writer / Reviewer pattern:</strong></p>
+            <table style="width:100%;font-size:12px;border-collapse:collapse;">
+              <tr><th style="padding:6px 8px;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);">Session A (Writer)</th><th style="padding:6px 8px;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);">Session B (Reviewer)</th></tr>
+              <tr><td style="padding:6px 8px;border:0.5px solid var(--color-border-tertiary);">Implement a rate limiter for our API endpoints</td><td style="padding:6px 8px;border:0.5px solid var(--color-border-tertiary);color:var(--color-text-tertiary);">—</td></tr>
+              <tr><td style="padding:6px 8px;border:0.5px solid var(--color-border-tertiary);color:var(--color-text-tertiary);">—</td><td style="padding:6px 8px;border:0.5px solid var(--color-border-tertiary);">Review @src/middleware/rateLimiter.ts for edge cases and race conditions</td></tr>
+              <tr><td style="padding:6px 8px;border:0.5px solid var(--color-border-tertiary);" colspan="2">Address review feedback: [Session B output]</td></tr>
+            </table>
+          </div>
+        </div>
+        <div class="pattern-card">
+          <div class="pattern-header" onclick="togglePattern(this)"><i class="ti ti-git-branch" aria-hidden="true" style="color:#7F77DD;font-size:16px;"></i> Fan out across files <i class="ti ti-chevron-down chev" aria-hidden="true"></i></div>
+          <div class="pattern-body">
+            <p style="font-size:13px;color:var(--color-text-secondary);line-height:1.5;margin-bottom:8px;">For large migrations, loop through a file list and invoke Claude for each:</p>
+            <div class="code-block">for file in $(cat files.txt); do
+  claude -p "Migrate $file from React to Vue. Return OK or FAIL." \
+    --allowedTools "Edit,Bash(git commit *)"
+done</div>
+            <p style="font-size:12px;color:var(--color-text-tertiary);margin-top:6px;">Test on 2–3 files first, then run at scale.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" id="sec-antipatterns">
+      <p class="section-title">Common failure patterns</p>
+      <p class="section-subtitle">Recognizing these early saves significant time. Each one has a reliable fix.</p>
+
+      <div class="pattern-grid">
+        <div class="pattern-card">
+          <div class="pattern-header" onclick="togglePattern(this)"><span class="badge badge-coral" style="font-size:12px;">Anti-pattern</span>&nbsp; Kitchen sink session <i class="ti ti-chevron-down chev" aria-hidden="true"></i></div>
+          <div class="pattern-body"><p style="font-size:13px;color:var(--color-text-secondary);line-height:1.5;">You start with one task, then ask Claude something unrelated, then go back to the first task. Context fills with irrelevant information.</p><p style="font-size:13px;margin-top:8px;"><strong>Fix:</strong> Use <code>/clear</code> between unrelated tasks.</p></div>
+        </div>
+        <div class="pattern-card">
+          <div class="pattern-header" onclick="togglePattern(this)"><span class="badge badge-coral" style="font-size:12px;">Anti-pattern</span>&nbsp; Correction loop <i class="ti ti-chevron-down chev" aria-hidden="true"></i></div>
+          <div class="pattern-body"><p style="font-size:13px;color:var(--color-text-secondary);line-height:1.5;">Claude does something wrong, you correct it, it's still wrong, you correct again. Context becomes polluted with failed approaches.</p><p style="font-size:13px;margin-top:8px;"><strong>Fix:</strong> After two failed corrections, <code>/clear</code> and write a better prompt using what you learned.</p></div>
+        </div>
+        <div class="pattern-card">
+          <div class="pattern-header" onclick="togglePattern(this)"><span class="badge badge-coral" style="font-size:12px;">Anti-pattern</span>&nbsp; Bloated CLAUDE.md <i class="ti ti-chevron-down chev" aria-hidden="true"></i></div>
+          <div class="pattern-body"><p style="font-size:13px;color:var(--color-text-secondary);line-height:1.5;">If CLAUDE.md is too long, Claude ignores half of it because important rules get lost in noise.</p><p style="font-size:13px;margin-top:8px;"><strong>Fix:</strong> Ruthlessly prune. If Claude already follows a rule without the instruction, delete it or convert it to a hook.</p></div>
+        </div>
+        <div class="pattern-card">
+          <div class="pattern-header" onclick="togglePattern(this)"><span class="badge badge-coral" style="font-size:12px;">Anti-pattern</span>&nbsp; Trust-then-verify gap <i class="ti ti-chevron-down chev" aria-hidden="true"></i></div>
+          <div class="pattern-body"><p style="font-size:13px;color:var(--color-text-secondary);line-height:1.5;">Claude produces a plausible-looking implementation that doesn't handle edge cases.</p><p style="font-size:13px;margin-top:8px;"><strong>Fix:</strong> Always provide verification — tests, scripts, screenshots. If you can't verify it, don't ship it.</p></div>
+        </div>
+        <div class="pattern-card">
+          <div class="pattern-header" onclick="togglePattern(this)"><span class="badge badge-coral" style="font-size:12px;">Anti-pattern</span>&nbsp; Infinite exploration <i class="ti ti-chevron-down chev" aria-hidden="true"></i></div>
+          <div class="pattern-body"><p style="font-size:13px;color:var(--color-text-secondary);line-height:1.5;">You ask Claude to "investigate" something without scoping it. Claude reads hundreds of files, filling context.</p><p style="font-size:13px;margin-top:8px;"><strong>Fix:</strong> Scope investigations narrowly, or use subagents so exploration doesn't consume your main context.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" id="sec-quiz">
+      <p class="section-title">Quiz yourself</p>
+      <p class="section-subtitle">Test your understanding of Claude Code best practices.</p>
+      <div id="quiz-container"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const navItems = document.querySelectorAll('.nav-item');
+navItems.forEach(item => {
+  item.addEventListener('click', () => {
+    const sec = item.dataset.sec;
+    navItems.forEach(n => n.classList.remove('active'));
+    item.classList.add('active');
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('visible'));
+    document.getElementById('sec-' + sec).classList.add('visible');
+  });
+});
+
+function goTo(sec) {
+  navItems.forEach(n => n.classList.remove('active'));
+  document.querySelector('[data-sec="' + sec + '"]').classList.add('active');
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('visible'));
+  document.getElementById('sec-' + sec).classList.add('visible');
+}
+
+function updateCtx() {
+  const files = parseInt(document.getElementById('sl-files').value);
+  const cmds = parseInt(document.getElementById('sl-cmds').value);
+  const corr = parseInt(document.getElementById('sl-corr').value);
+  document.getElementById('sl-files-v').textContent = files;
+  document.getElementById('sl-cmds-v').textContent = cmds;
+  document.getElementById('sl-corr-v').textContent = corr;
+  const pct = Math.min(100, Math.round(files * 6 + cmds * 4 + corr * 12 + 5));
+  document.getElementById('ctx-bar').style.width = pct + '%';
+  const tip = document.getElementById('ctx-tip');
+  if (pct < 30) {
+    tip.style.background = '#E1F5EE'; tip.style.color = '#085041';
+    tip.textContent = 'Context is healthy. Claude is performing well.';
+  } else if (pct < 65) {
+    tip.style.background = '#FAEEDA'; tip.style.color = '#633806';
+    tip.textContent = 'Context is filling up. Consider /compact or scoping your next prompt carefully.';
+  } else {
+    tip.style.background = '#FAECE7'; tip.style.color = '#4A1B0C';
+    tip.textContent = 'Context is getting full. Performance may degrade. Run /clear and start a fresh session with a tighter prompt.';
+  }
+  tip.classList.add('show');
+}
+updateCtx();
+
+function togglePattern(header) {
+  const body = header.nextElementSibling;
+  const chev = header.querySelector('.chev');
+  const open = body.classList.toggle('open');
+  chev.classList.toggle('open', open);
+}
+
+const questions = [
+  {
+    q: "What is the single highest-leverage habit for getting better results from Claude Code?",
+    opts: ["Writing longer prompts", "Giving Claude a way to verify its work (tests, screenshots, expected outputs)", "Using plan mode for every task", "Running /clear frequently"],
+    ans: 1,
+    explain: "Claude performs dramatically better when it can verify its own work. Without verification, you become the only feedback loop and every mistake requires your attention."
+  },
+  {
+    q: "When should you skip the Explore → Plan → Code workflow?",
+    opts: ["When you're unfamiliar with the code being modified", "For tasks that modify multiple files", "For small, clear tasks like fixing a typo or adding a log line", "When you're uncertain about the approach"],
+    ans: 2,
+    explain: "Planning adds overhead. If you could describe the diff in one sentence, skip the plan. Plan mode is most valuable for multi-file changes or unfamiliar territory."
+  },
+  {
+    q: "What should you do after correcting Claude on the same issue twice in a row?",
+    opts: ["Keep correcting and hope Claude gets it", "Run /clear and start fresh with a better prompt incorporating what you learned", "Switch to plan mode", "Use /compact to summarize the failed approaches"],
+    ans: 1,
+    explain: "After two failed corrections, the context is cluttered with failed approaches. A clean session with a better prompt almost always outperforms a long session with accumulated corrections."
+  },
+  {
+    q: "Why should CLAUDE.md be kept short?",
+    opts: ["To save disk space", "Because Claude only reads the first 50 lines", "Because bloated CLAUDE.md files cause Claude to ignore important rules", "Because it slows down session startup"],
+    ans: 2,
+    explain: "If Claude keeps doing something you don't want, the CLAUDE.md is probably too long and the rule is getting lost. For each line, ask: 'Would removing this cause Claude to make mistakes?'"
+  },
+  {
+    q: "What is the primary advantage of using subagents for investigation?",
+    opts: ["They are faster than Claude", "They explore in a separate context, keeping your main conversation clean", "They have access to more tools", "They can run in parallel automatically"],
+    ans: 1,
+    explain: "Since context is the fundamental constraint, subagents are one of the most powerful tools. They explore the codebase, read relevant files, and report back summaries — all without cluttering your main conversation."
+  },
+  {
+    q: "What does /btw do differently from a regular question?",
+    opts: ["It searches the web for an answer", "It asks a subagent the question", "The answer appears in a dismissible overlay and never enters conversation history", "It pauses the current task to answer the question"],
+    ans: 2,
+    explain: "Use /btw for quick questions that don't need to stay in context. The answer appears in an overlay and never enters conversation history, so you can check a detail without growing context."
+  }
+];
+
+let qi = 0, score = 0, answered = false;
+
+function renderQuiz() {
+  const c = document.getElementById('quiz-container');
+  if (qi >= questions.length) {
+    c.innerHTML = '<div style="text-align:center;padding:24px;">' +
+      '<p style="font-size:22px;font-weight:500;margin-bottom:8px;">' + score + ' / ' + questions.length + '</p>' +
+      '<p style="font-size:14px;color:var(--color-text-secondary);margin-bottom:20px;">' + (score >= 5 ? "Excellent! You've got the fundamentals." : score >= 3 ? "Good foundation — revisit the sections where you missed." : "Review the guide again and come back.") + '</p>' +
+      '<button onclick="qi=0;score=0;answered=false;renderQuiz();" style="padding:8px 20px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);font-size:13px;cursor:pointer;background:var(--color-background-primary);color:var(--color-text-primary);">Try again</button></div>';
+    return;
+  }
+  const q = questions[qi];
+  answered = false;
+  let opts = q.opts.map((o, i) => '<button class="quiz-opt" onclick="answer(' + i + ')">' + o + '</button>').join('');
+  c.innerHTML = '<p class="quiz-q">' + (qi + 1) + '. ' + q.q + '</p>' +
+    '<div class="quiz-options">' + opts + '</div>' +
+    '<div class="quiz-feedback" id="qfb"></div>' +
+    '<div class="quiz-nav"><button id="qnext" onclick="nextQ()" style="display:none;">Next question →</button><span class="quiz-prog">Question ' + (qi + 1) + ' of ' + questions.length + '</span></div>';
+}
+
+function answer(i) {
+  if (answered) return;
+  answered = true;
+  const q = questions[qi];
+  const opts = document.querySelectorAll('.quiz-opt');
+  opts.forEach((o, idx) => {
+    if (idx === q.ans) o.classList.add('correct');
+    else if (idx === i && i !== q.ans) o.classList.add('wrong');
+    o.style.pointerEvents = 'none';
+  });
+  if (i === q.ans) score++;
+  const fb = document.getElementById('qfb');
+  fb.textContent = q.explain;
+  fb.className = 'quiz-feedback show ' + (i === q.ans ? 'ok' : 'no');
+  document.getElementById('qnext').style.display = 'inline-block';
+}
+
+function nextQ() { qi++; renderQuiz(); }
+renderQuiz();
+</script>
